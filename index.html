@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#080c17">
+    <meta name="description" content="Race a futuristic hovercraft through the Afterdark Circuit in NEON DRIFT.">
+    <link rel="icon" type="image/png" href="./favicon.png">
+    <link rel="stylesheet" href="/src/style.css">
+    <noscript><style>#startup-status { display: none; }</style></noscript>
+    <title>NEON DRIFT</title>
+  </head>
+  <body>
+    <canvas id="race-view" aria-label="Afterdark Circuit"></canvas>
+    <div class="vignette" aria-hidden="true"></div>
+    <main id="start-screen" class="start-screen">
+      <header class="topbar">
+        <div class="wordmark"><span class="emblem" aria-hidden="true"></span> NEON<span class="quiet">DRIFT</span></div>
+        <nav class="menu-nav" aria-label="Game menu">
+          <button type="button" id="show-settings" class="outline-button" disabled>Settings</button>
+          <button type="button" id="show-controls" class="outline-button" disabled>Controls <span aria-hidden="true">↗</span></button>
+        </nav>
+      </header>
+      <section class="hero" aria-labelledby="game-title">
+        <p class="eyebrow"><span></span> AFTERDARK CIRCUIT <span class="index">/ 01</span></p>
+        <h1 id="game-title">NEON <em>DRIFT</em></h1>
+        <p class="intro">A midnight time trial through neon-lit city streets.</p>
+        <button type="button" class="primary-button" id="play" disabled><span class="play-icon" aria-hidden="true"></span> Play <span aria-hidden="true">↗</span></button>
+        <p id="startup-status" class="startup-status" role="status">Loading game code…</p>
+        <p id="graphics-error" class="notice" role="alert" hidden>NEON DRIFT couldn’t start. Refresh the page. If it still won’t start, try a current browser with hardware acceleration.</p>
+        <p id="touch-notice" class="notice device-notice" hidden>Touch controls are unavailable. Use a physical keyboard to play.</p>
+        <p class="notice" role="status" data-graphics-status hidden></p>
+        <noscript><p class="notice">Enable JavaScript to play NEON DRIFT.</p></noscript>
+        <p id="title-best" class="title-best" hidden>Personal best <output id="title-best-time"></output></p>
+      </section>
+      <footer class="controls-strip" aria-label="Keyboard shortcuts">
+        <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><span>Drive</span></div>
+        <div><kbd>L SHIFT</kbd><span>Drift</span></div>
+        <div><kbd>SPACE</kbd><span>Boost</span></div>
+        <div><kbd>T</kbd><span>Restart</span></div>
+      </footer>
+    </main>
+
+    <section id="hud" class="hud" aria-label="Race dashboard" hidden>
+      <div class="race-data hud-panel">
+        <div><span class="hud-label">Time</span><output id="time" aria-live="off">00:00.000</output></div>
+        <div><span class="hud-label">Best</span><output id="best">—</output></div>
+        <div><span class="hud-label">Gates</span><output id="checkpoints">0/6</output></div>
+      </div>
+      <div class="course">
+        <button type="button" id="pause" class="outline-button">Pause <span class="pause-icon" aria-hidden="true"></span></button>
+        <div class="hud-panel map-panel">
+          <span class="hud-label">Afterdark Circuit</span>
+          <canvas id="minimap" width="240" height="192" aria-label="Circuit minimap"></canvas>
+        </div>
+      </div>
+      <div id="wrong-way" class="wrong-way" hidden>Wrong way</div>
+      <div id="checkpoint-feedback" class="checkpoint-feedback" role="status" hidden></div>
+      <div class="speed hud-panel">
+        <div class="speed-readout"><output id="speed" aria-live="off">000</output><span>KM/H</span></div>
+        <div class="speed-track" aria-hidden="true"><div id="speed-fill"></div></div>
+        <div id="boost-display" class="boost-display">
+          <div class="boost-label"><span id="boost-label">Boost 0%</span><kbd>SPACE</kbd></div>
+          <meter id="boost-meter" aria-label="Boost energy" min="0" max="1" value="0"></meter>
+          <div class="boost-track" aria-hidden="true"><div id="boost-fill"></div></div>
+        </div>
+      </div>
+      <div id="drift" class="drift" hidden>Drifting</div>
+      <button type="button" id="reset" class="outline-button reset">Reset <kbd>R</kbd></button>
+    </section>
+
+    <dialog id="controls-menu" aria-labelledby="controls-title">
+      <h2 id="controls-title">Controls</h2>
+      <dl class="key-list">
+        <div><dt>Accelerate</dt><dd><kbd>W</kbd><kbd>↑</kbd></dd></div>
+        <div><dt>Brake / Reverse</dt><dd><kbd>S</kbd><kbd>↓</kbd></dd></div>
+        <div><dt>Steer</dt><dd><kbd>A</kbd><kbd>D</kbd><kbd>←</kbd><kbd>→</kbd></dd></div>
+        <div><dt>Hold to drift</dt><dd><kbd>L SHIFT</kbd></dd></div>
+        <div><dt>Press to boost</dt><dd><kbd>SPACE</kbd></dd></div>
+        <div><dt>Reset vehicle</dt><dd><kbd>R</kbd></dd></div>
+        <div><dt>Restart run</dt><dd><kbd>T</kbd></dd></div>
+        <div><dt>Pause / Resume</dt><dd><kbd>ESC</kbd><kbd>P</kbd></dd></div>
+      </dl>
+      <button type="button" class="primary-button" id="close-controls">Back <span aria-hidden="true">↗</span></button>
+    </dialog>
+
+    <dialog id="pause-menu" aria-labelledby="pause-title">
+      <p class="eyebrow"><span></span> AFTERDARK CIRCUIT</p>
+      <h2 id="pause-title">Paused</h2>
+      <p class="notice" role="status" data-graphics-status hidden></p>
+      <div class="menu-actions">
+        <button type="button" class="primary-button" id="resume">Resume <span aria-hidden="true">↗</span></button>
+        <button type="button" class="outline-button" id="pause-restart">Restart run <kbd>T</kbd></button>
+        <button type="button" class="outline-button" id="pause-reset">Reset vehicle <kbd>R</kbd></button>
+        <button type="button" class="outline-button" id="pause-settings">Settings <span aria-hidden="true">↗</span></button>
+        <button type="button" class="outline-button" id="exit-race">Return to title</button>
+      </div>
+    </dialog>
+    <dialog id="finish-menu" aria-labelledby="finish-title">
+      <p class="eyebrow"><span></span> AFTERDARK CIRCUIT</p>
+      <h2 id="finish-title">Run complete</h2>
+      <p class="notice" role="status" data-graphics-status hidden></p>
+      <p id="new-best" class="record-badge" hidden>New Best Time</p>
+      <div class="finish-times">
+        <div><span class="hud-label">Run time</span><output id="finish-time"></output></div>
+        <div><span class="hud-label">Personal best</span><output id="finish-best"></output></div>
+      </div>
+      <div class="menu-actions">
+        <button type="button" class="primary-button" id="replay">Retry <span aria-hidden="true">↗</span></button>
+        <button type="button" class="outline-button" id="finish-exit">Return to title</button>
+      </div>
+    </dialog>
+    <dialog id="settings-menu" aria-labelledby="settings-title">
+      <h2 id="settings-title">Settings</h2>
+      <div class="settings-list">
+        <div class="setting-row">
+          <label for="graphics-preset">Graphics preset</label>
+          <select id="graphics-preset">
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+          </select>
+        </div>
+        <label class="setting-row" for="visual-effects">Visual effects <input type="checkbox" id="visual-effects"></label>
+        <div class="setting-row setting-volume">
+          <label for="sound-volume">Sound volume</label><output id="sound-percent" for="sound-volume"></output>
+          <input id="sound-volume" type="range" min="0" max="100" step="1">
+        </div>
+        <label class="setting-row" for="sound-muted">Mute sound <input type="checkbox" id="sound-muted"></label>
+      </div>
+      <button type="button" class="primary-button" id="close-settings">Done <span aria-hidden="true">↗</span></button>
+    </dialog>
+    <script>
+      window.addEventListener('error', event => {
+        const progress = document.getElementById('startup-status');
+        if (!progress.hidden && event.target instanceof HTMLScriptElement && event.target.type === 'module') {
+          progress.hidden = true;
+          document.getElementById('graphics-error').hidden = false;
+        }
+      }, true);
+    </script>
+    <script type="module" src="/src/bootstrap.ts"></script>
+  </body>
+</html>

@@ -1,7 +1,7 @@
 # NEON DRIFT
 
-NEON DRIFT is a single-player hover racing time trial on the Afterdark Circuit. Drift to earn boost, clear all six checkpoints, and beat your best lap.
- https://dev-piyushrawat.itch.io/neon-drift
+NEON DRIFT is a single-player hover racing time trial on the Afterdark Circuit. Drift to earn boost, clear all six checkpoints, and beat your best lap.             
+                           Play the Game here for free - https://dev-piyushrawat.itch.io/neon-drift
 ## Features
 
 - Procedural neon city, hovercraft, and chase camera
